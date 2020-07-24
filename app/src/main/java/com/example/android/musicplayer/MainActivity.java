@@ -24,8 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private double finalTime = 0;
 
     private Handler myHandler = new Handler();
-    private int forwardTime = 5000;
-    private int backwardTime = 5000;
+    private int forwardTime = 15000;
+    private int backwardTime = 15000;
     private SeekBar seekbar;
     private TextView songTitle, duration, currentPosition;
 
@@ -121,10 +121,10 @@ public class MainActivity extends AppCompatActivity {
                 if((temp + forwardTime) <= finalTime) {
                     startTime += forwardTime;
                     mediaPlayer.seekTo((int) startTime);
-                    Toast.makeText(getApplicationContext(), "You have jumped forward 5 seconds",
+                    Toast.makeText(getApplicationContext(), "You have jumped forward 15 seconds",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Cannot jump forward 5 seconds",
+                    Toast.makeText(getApplicationContext(), "Cannot jump forward 15 seconds",
                             Toast.LENGTH_SHORT).show();
                 }
 
@@ -139,10 +139,10 @@ public class MainActivity extends AppCompatActivity {
                 if((temp - backwardTime) > 0) {
                     startTime -= backwardTime;
                     mediaPlayer.seekTo((int) startTime);
-                    Toast.makeText(getApplicationContext(), "You have jumped backward 5 seconds",
+                    Toast.makeText(getApplicationContext(), "You have jumped backward 15 seconds",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Cannot jump backward 5 seconds",
+                    Toast.makeText(getApplicationContext(), "Cannot jump backward 15 seconds",
                             Toast.LENGTH_SHORT).show();
                 }
 
@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mediaPlayer.release();
                 mediaPlayer.seekTo(0);
             }
         });
@@ -165,6 +166,14 @@ public class MainActivity extends AppCompatActivity {
 
                 pauseButton.setEnabled(false);
                 playButton.setEnabled(true);
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Toast.makeText(getApplicationContext(), "I'm done!", Toast.LENGTH_SHORT).show();
+                mediaPlayer.release();
             }
         });
     }
