@@ -48,20 +48,33 @@ public class MainActivity extends AppCompatActivity {
         stopButton = (Button) findViewById(R.id.stop);
 
         pauseButton.setEnabled(false);
-        mediaPlayer = MediaPlayer.create(this, R.raw.tomb_raider2);
+
         seekbar = (SeekBar) findViewById(R.id.seekbar);
         seekbar.setClickable(false);
-        songTitle.setText("Tomb Raider II Soundtrack - 02 - Venice Violins");
+
+        String resourceTitle = getResources().getString(R.string.resource_title);
+        songTitle.setText(resourceTitle);
+
+
+        /**
+         * TODO: the media player should be initialized after the play button is clicked OR
+         * create a new activity that displays a list of available songs
+         *
+         */
+        // Create the mediaPlayer and set it to the media file
+        mediaPlayer = MediaPlayer.create(this, R.raw.tomb_raider2);
 
         finalTime = mediaPlayer.getDuration();
         startTime = mediaPlayer.getCurrentPosition();
 
+        // Displays the starting position (0 min, 0 sec)
         currentPosition.setText(String.format(Locale.US,"%d min, %d sec",
                 TimeUnit.MILLISECONDS.toMinutes((long) startTime),
                 TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
                                 startTime))));
 
+        // Displays the total duration (0 min, 0 sec)
         duration.setText(String.format(Locale.US,"%d min, %d sec",
                 TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
                 TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
@@ -71,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tomb_raider2);
+
                 Toast.makeText(getApplicationContext(), "Playing sound",
                         Toast.LENGTH_SHORT).show();
                 mediaPlayer.start();
@@ -161,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mediaPlayer.reset();
-                mediaPlayer.release();
+                releaseMediaPlayer();
                 mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tomb_raider2);
 
                 pauseButton.setEnabled(false);
@@ -173,10 +188,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Toast.makeText(getApplicationContext(), "I'm done!", Toast.LENGTH_SHORT).show();
-                mediaPlayer.release();
+                releaseMediaPlayer();
             }
         });
     }
+
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        releaseMediaPlayer();
+//    }
 
     private Runnable UpdateSongTime = new Runnable() {
         @Override
@@ -191,5 +212,19 @@ public class MainActivity extends AppCompatActivity {
             myHandler.postDelayed(this, 100);
         }
     };
+
+    private void releaseMediaPlayer() {
+        // If the media player is not null, then it may be currently playing a sound.
+        if (mediaPlayer != null) {
+            // Regardless of the current state of the media player, release its resources
+            // because we no longer need it
+            mediaPlayer.release();
+
+            // Set the media player to null, for our code, we've decided that
+            // setting the media player to null is an easy way to tell that the media player
+            // is not configured to play an audio file at the moment.
+            mediaPlayer = null;
+        }
+    }
 
 }
