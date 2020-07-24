@@ -55,110 +55,74 @@ public class MainActivity extends AppCompatActivity {
         String resourceTitle = getResources().getString(R.string.resource_title);
         songTitle.setText(resourceTitle);
 
-
         /**
          * TODO: the media player should be initialized after the play button is clicked OR
          * create a new activity that displays a list of available songs
          *
          */
         // Create the mediaPlayer and set it to the media file
-        mediaPlayer = MediaPlayer.create(this, R.raw.tomb_raider2);
-
-        finalTime = mediaPlayer.getDuration();
-        startTime = mediaPlayer.getCurrentPosition();
-
-        // Displays the starting position (0 min, 0 sec)
-        currentPosition.setText(String.format(Locale.US,"%d min, %d sec",
-                TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                startTime))));
-
-        // Displays the total duration (0 min, 0 sec)
-        duration.setText(String.format(Locale.US,"%d min, %d sec",
-                TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
-                TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                finalTime))));
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tomb_raider2);
-
-                Toast.makeText(getApplicationContext(), "Playing sound",
-                        Toast.LENGTH_SHORT).show();
-                mediaPlayer.start();
-
-                if(oneTimeOnly == 0) {
-                    seekbar.setMax((int) finalTime);
-                    oneTimeOnly = 1;
+                if(mediaPlayer != null) {
+                    mediaPlayer.start();
+                    pauseButton.setEnabled(true);
+                    playButton.setEnabled(false);
+                } else {
+                    playMedia(R.raw.tomb_raider2);
                 }
-
-                finalTime = mediaPlayer.getDuration();
-                startTime = mediaPlayer.getCurrentPosition();
-
-                duration.setText(String.format(Locale.US,"%d min, %d sec",
-                        TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
-                        TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                finalTime))));
-
-                currentPosition.setText(String.format(Locale.US,"%d min, %d sec",
-                        TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                        TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                        startTime))));
-
-                seekbar.setProgress((int) startTime);
-                myHandler.postDelayed(UpdateSongTime, 100);
-                pauseButton.setEnabled(true);
-                playButton.setEnabled(false);
             }
         });
 
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Pausing sound",
-                        Toast.LENGTH_SHORT).show();
-                mediaPlayer.pause();
-                pauseButton.setEnabled(false);
-                playButton.setEnabled(true);
+                if(mediaPlayer != null) {
+                    Toast.makeText(getApplicationContext(), "Pausing sound",
+                            Toast.LENGTH_SHORT).show();
+                    mediaPlayer.pause();
+                    pauseButton.setEnabled(false);
+                    playButton.setEnabled(true);
+                }
             }
         });
 
         forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int temp = (int) startTime;
+                if(mediaPlayer != null) {
+                    int temp = (int) startTime;
 
-                if((temp + forwardTime) <= finalTime) {
-                    startTime += forwardTime;
-                    mediaPlayer.seekTo((int) startTime);
-                    Toast.makeText(getApplicationContext(), "You have jumped forward 15 seconds",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Cannot jump forward 15 seconds",
-                            Toast.LENGTH_SHORT).show();
+                    if((temp + forwardTime) <= finalTime) {
+                        startTime += forwardTime;
+                        mediaPlayer.seekTo((int) startTime);
+                        Toast.makeText(getApplicationContext(), "You have jumped forward 15 seconds",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Cannot jump forward 15 seconds",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
-
             }
         });
 
         rewindButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int temp = (int) startTime;
 
-                if((temp - backwardTime) > 0) {
-                    startTime -= backwardTime;
-                    mediaPlayer.seekTo((int) startTime);
-                    Toast.makeText(getApplicationContext(), "You have jumped backward 15 seconds",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Cannot jump backward 15 seconds",
-                            Toast.LENGTH_SHORT).show();
+                if(mediaPlayer != null) {
+                    int temp = (int) startTime;
+
+                    if((temp - backwardTime) > 0) {
+                        startTime -= backwardTime;
+                        mediaPlayer.seekTo((int) startTime);
+                        Toast.makeText(getApplicationContext(), "You have jumped backward 15 seconds",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Cannot jump backward 15 seconds",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
 
             }
@@ -167,49 +131,54 @@ public class MainActivity extends AppCompatActivity {
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.release();
-                mediaPlayer.seekTo(0);
+                if(mediaPlayer != null) {
+                    mediaPlayer.reset();
+                    mediaPlayer.seekTo(0);
+
+                    pauseButton.setEnabled(false);
+                    playButton.setEnabled(true);
+                } else {
+                    playMedia(R.raw.tomb_raider2);
+                }
             }
         });
 
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.reset();
-                releaseMediaPlayer();
-                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.tomb_raider2);
+                if(mediaPlayer != null) {
+                    mediaPlayer.reset();
+                    releaseMediaPlayer();
 
-                pauseButton.setEnabled(false);
-                playButton.setEnabled(true);
+                    pauseButton.setEnabled(false);
+                    playButton.setEnabled(true);
+
+                }
             }
         });
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Toast.makeText(getApplicationContext(), "I'm done!", Toast.LENGTH_SHORT).show();
-                releaseMediaPlayer();
-            }
-        });
     }
 
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        releaseMediaPlayer();
-//    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        releaseMediaPlayer();
+    }
 
     private Runnable UpdateSongTime = new Runnable() {
         @Override
         public void run() {
-            startTime = mediaPlayer.getCurrentPosition();
-            currentPosition.setText(String.format(Locale.US,"%d min, %d sec",
-                    TimeUnit.MILLISECONDS.toMinutes((long) startTime),
-                    TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
-                                    startTime))));
-            seekbar.setProgress((int) startTime);
-            myHandler.postDelayed(this, 100);
+
+            if (mediaPlayer != null) {
+                startTime = mediaPlayer.getCurrentPosition();
+                currentPosition.setText(String.format(Locale.US, "%d min, %d sec",
+                        TimeUnit.MILLISECONDS.toMinutes((long) startTime),
+                        TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                        startTime))));
+                seekbar.setProgress((int) startTime);
+                myHandler.postDelayed(this, 100);
+            }
         }
     };
 
@@ -224,7 +193,52 @@ public class MainActivity extends AppCompatActivity {
             // setting the media player to null is an easy way to tell that the media player
             // is not configured to play an audio file at the moment.
             mediaPlayer = null;
+
+            //Reset the Play & Pause buttons
+            pauseButton.setEnabled(false);
+            playButton.setEnabled(true);
         }
+    }
+
+    private void playMedia(int resourceId) {
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), resourceId);
+
+        Toast.makeText(getApplicationContext(), "Playing sound",
+                Toast.LENGTH_SHORT).show();
+        mediaPlayer.start();
+
+        finalTime = mediaPlayer.getDuration();
+        startTime = mediaPlayer.getCurrentPosition();
+
+        if(oneTimeOnly == 0) {
+            seekbar.setMax((int) finalTime);
+            oneTimeOnly = 1;
+        }
+
+        duration.setText(String.format(Locale.US,"%d min, %d sec",
+                TimeUnit.MILLISECONDS.toMinutes((long) finalTime),
+                TimeUnit.MILLISECONDS.toSeconds((long) finalTime) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                finalTime))));
+
+        currentPosition.setText(String.format(Locale.US,"%d min, %d sec",
+                TimeUnit.MILLISECONDS.toMinutes((long) startTime),
+                TimeUnit.MILLISECONDS.toSeconds((long) startTime) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((long)
+                                startTime))));
+
+        seekbar.setProgress((int) startTime);
+        myHandler.postDelayed(UpdateSongTime, 100);
+        pauseButton.setEnabled(true);
+        playButton.setEnabled(false);
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Toast.makeText(getApplicationContext(), "I'm done!", Toast.LENGTH_SHORT).show();
+                releaseMediaPlayer();
+            }
+        });
     }
 
 }
